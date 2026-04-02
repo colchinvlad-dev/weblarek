@@ -1,3 +1,0 @@
-mkdir new-folder echo. > new-folder\example.txt
-git add new-folder/
-git commit -m "Add new folder with example file".
