@@ -5,8 +5,8 @@ export interface IApi {
     post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
 }
 
-// Тип для способа оплаты
-export type TPayment = 'card' | 'cash';
+// Тип для способа оплаты – добавлена пустая строка как начальное значение
+export type TPayment = 'card' | 'cash' | '';
 
 // Интерфейс товара
 export interface IProduct {
@@ -18,7 +18,7 @@ export interface IProduct {
     price: number | null;
 }
 
-// Интерфейс данных покупателя (без валидации, просто данные)
+// Интерфейс данных покупателя (поля могут быть пустыми до заполнения)
 export interface IBuyer {
     payment: TPayment;
     email: string;
@@ -26,12 +26,8 @@ export interface IBuyer {
     address: string;
 }
 
-// Тип данных, отправляемых на сервер при оформлении заказа
-export interface IOrder {
-    payment: TPayment;
-    email: string;
-    phone: string;
-    address: string;
+// Заказ расширяет данные покупателя и добавляет специфичные поля
+export interface IOrder extends IBuyer {
     total: number;
     items: string[];
 }
