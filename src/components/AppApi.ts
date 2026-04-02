@@ -4,16 +4,15 @@ import { IOrder, IOrderResult, IProductsResponse } from '../types';
 export class AppApi {
     private api: Api;
 
-    constructor(baseUrl: string, options?: RequestInit) {
-        this.api = new Api(baseUrl, options);
+    // Принимаем готовый экземпляр Api, а не создаём внутри
+    constructor(api: Api) {
+        this.api = api;
     }
 
-    // Получить список товаров с сервера
     getProducts(): Promise<IProductsResponse> {
         return this.api.get<IProductsResponse>('/product');
     }
 
-    // Отправить заказ
     postOrder(order: IOrder): Promise<IOrderResult> {
         return this.api.post<IOrderResult>('/order', order);
     }
