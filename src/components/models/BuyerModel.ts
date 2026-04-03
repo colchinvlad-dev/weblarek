@@ -2,13 +2,13 @@ import { IBuyer, TPayment } from '../../types';
 
 export type BuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
-export class BuyerModel implements IBuyer {
+// Класс хранит данные покупателя и работает с ними, но не является самими данными
+export class BuyerModel {
     protected _payment: TPayment = '';
     protected _email: string = '';
     protected _phone: string = '';
     protected _address: string = '';
 
-    // Геттеры для доступа к полям (если нужны)
     get payment(): TPayment {
         return this._payment;
     }
@@ -25,7 +25,6 @@ export class BuyerModel implements IBuyer {
         return this._address;
     }
 
-    // Установка конкретного поля
     setField<K extends keyof IBuyer>(field: K, value: IBuyer[K]): void {
         switch (field) {
             case 'payment':
@@ -43,7 +42,6 @@ export class BuyerModel implements IBuyer {
         }
     }
 
-    // Получение всех данных
     getData(): IBuyer {
         return {
             payment: this._payment,
@@ -53,7 +51,6 @@ export class BuyerModel implements IBuyer {
         };
     }
 
-    // Очистка всех полей
     clear(): void {
         this._payment = '';
         this._email = '';
@@ -61,7 +58,6 @@ export class BuyerModel implements IBuyer {
         this._address = '';
     }
 
-    // Валидация: возвращает объект с ошибками для непустых полей
     validate(): BuyerErrors {
         const errors: BuyerErrors = {};
 
