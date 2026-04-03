@@ -1,11 +1,11 @@
-import { Api } from './base/Api';
+import { IApi } from '../types';
 import { IOrder, IOrderResult, IProductsResponse } from '../types';
 
 export class AppApi {
-    private api: Api;
+    private api: IApi;
 
-    // Принимаем готовый экземпляр Api, а не создаём внутри
-    constructor(api: Api) {
+    // Принимаем любой объект, реализующий интерфейс IApi
+    constructor(api: IApi) {
         this.api = api;
     }
 
