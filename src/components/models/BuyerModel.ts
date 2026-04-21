@@ -1,45 +1,29 @@
 import { IBuyer, TPayment } from '../../types';
+import { IEvents } from '../base/Events';
 
 export type BuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
-// Класс хранит данные покупателя и работает с ними, но не является самими данными
 export class BuyerModel {
     protected _payment: TPayment = '';
     protected _email: string = '';
     protected _phone: string = '';
     protected _address: string = '';
 
-    get payment(): TPayment {
-        return this._payment;
-    }
+    constructor(protected events: IEvents) {}
 
-    get email(): string {
-        return this._email;
-    }
-
-    get phone(): string {
-        return this._phone;
-    }
-
-    get address(): string {
-        return this._address;
-    }
+    get payment(): TPayment { return this._payment; }
+    get email(): string { return this._email; }
+    get phone(): string { return this._phone; }
+    get address(): string { return this._address; }
 
     setField<K extends keyof IBuyer>(field: K, value: IBuyer[K]): void {
         switch (field) {
-            case 'payment':
-                this._payment = value as TPayment;
-                break;
-            case 'email':
-                this._email = value as string;
-                break;
-            case 'phone':
-                this._phone = value as string;
-                break;
-            case 'address':
-                this._address = value as string;
-                break;
+            case 'payment': this._payment = value as TPayment; break;
+            case 'email': this._email = value as string; break;
+            case 'phone': this._phone = value as string; break;
+            case 'address': this._address = value as string; break;
         }
+        this.events.emit('buyer:changed', this.getData());
     }
 
     getData(): IBuyer {
@@ -56,24 +40,27 @@ export class BuyerModel {
         this._email = '';
         this._phone = '';
         this._address = '';
+        this.events.emit('buyer:changed', this.getData());
     }
 
-    validate(): BuyerErrors {
+    // Валидация только для первого шага (payment, address)
+    validateOrder(): BuyerErrors {
         const errors: BuyerErrors = {};
-
-        if (!this._payment) {
-            errors.payment = 'Не выбран способ оплаты';
-        }
-        if (!this._email.trim()) {
-            errors.email = 'Укажите email';
-        }
-        if (!this._phone.trim()) {
-            errors.phone = 'Укажите телефон';
-        }
-        if (!this._address.trim()) {
-            errors.address = 'Укажите адрес доставки';
-        }
-
+        if (!this._payment) errors.payment = 'Не выбран способ оплаты';
+        if (!this._address.trim()) errors.address = 'Укажите адрес доставки';
         return errors;
+    }
+
+    // Валидация только для второго шага (email, phone)
+    validateContacts(): BuyerErrors {
+        const errors: BuyerErrors = {};
+        if (!this._email.trim()) errors.email = 'Укажите email';
+        if (!this._phone.trim()) errors.phone = 'Укажите телефон';
+        return errors;
+    }
+
+    // Общая валидация (если понадобится)
+    validate(): BuyerErrors {
+        return { ...this.validateOrder(), ...this.validateContacts() };
     }
 }

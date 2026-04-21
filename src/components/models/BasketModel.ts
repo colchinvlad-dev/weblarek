@@ -1,41 +1,40 @@
 import { IProduct } from '../../types';
+import { IEvents } from '../base/Events';
 
 export class BasketModel {
     private items: IProduct[] = [];
 
-    // Получить все товары в корзине
+    constructor(protected events: IEvents) {}
+
     getItems(): IProduct[] {
         return this.items;
     }
 
-    // Добавить товар (если ещё не добавлен)
     addItem(item: IProduct): void {
         if (!this.contains(item.id)) {
             this.items.push(item);
+            this.events.emit('basket:changed', { items: this.items });
         }
     }
 
-    // Удалить товар по id
     removeItem(id: string): void {
         this.items = this.items.filter(item => item.id !== id);
+        this.events.emit('basket:changed', { items: this.items });
     }
 
-    // Очистить корзину
     clear(): void {
         this.items = [];
+        this.events.emit('basket:changed', { items: this.items });
     }
 
-    // Общая стоимость товаров в корзине
     getTotalPrice(): number {
         return this.items.reduce((sum, item) => sum + (item.price ?? 0), 0);
     }
 
-    // Количество товаров в корзине
     getCount(): number {
         return this.items.length;
     }
 
-    // Проверить, есть ли товар с указанным id в корзине
     contains(id: string): boolean {
         return this.items.some(item => item.id === id);
     }
