@@ -163,85 +163,192 @@ Presenter - презентер содержит основную логику п
 
 ### Базовые классы
 
+### `ProductsModel`
+**Назначение:** хранение каталога товаров и выбранного для просмотра товара.
+
+**Поля:**
+- `items: IProduct[]` – массив товаров каталога.
+- `selectedItem: IProduct | null` – выбранный товар.
+
+**Методы:**
+- `setItems(items: IProduct[]): void` – сохраняет массив товаров, генерирует событие `catalog:changed`.
+- `getItems(): IProduct[]` – возвращает все товары.
+- `getItemById(id: string): IProduct | undefined` – возвращает товар по идентификатору.
+- `setSelectedItem(item: IProduct): void` – сохраняет выбранный товар, генерирует событие `product:selected`.
+- `getSelectedItem(): IProduct | null` – возвращает выбранный товар.
+
+### `BasketModel`
+**Назначение:** хранение товаров, добавленных в корзину.
+
+**Поля:**
+- `items: IProduct[]` – массив товаров в корзине.
+
+**Методы:**
+- `getItems(): IProduct[]` – возвращает все товары в корзине.
+- `addItem(item: IProduct): void` – добавляет товар, генерирует событие `basket:changed`.
+- `removeItem(id: string): void` – удаляет товар по id, генерирует событие `basket:changed`.
+- `clear(): void` – очищает корзину, генерирует событие `basket:changed`.
+- `getTotalPrice(): number` – возвращает общую стоимость.
+- `getCount(): number` – возвращает количество товаров.
+- `contains(id: string): boolean` – проверяет наличие товара по id.
+
+### `BuyerModel`
+**Назначение:** хранение данных покупателя и их валидация.
+
+**Поля:**
+- `_payment: TPayment` – способ оплаты (пустая строка по умолчанию).
+- `_email: string`
+- `_phone: string`
+- `_address: string`
+
+**Методы:**
+- `setField<K extends keyof IBuyer>(field: K, value: IBuyer[K]): void` – устанавливает значение поля, генерирует событие `buyer:changed`.
+- `getData(): IBuyer` – возвращает все данные.
+- `clear(): void` – очищает все поля, генерирует событие `buyer:changed`.
+- `validate(): BuyerErrors` – проверяет все поля, возвращает объект с ошибками.
+
 #### `Component<T>`
-Абстрактный базовый класс для всех компонентов интерфейса. Предоставляет методы для работы с DOM.
-- `render(data?: Partial<T>): HTMLElement` — отрисовывает компонент с переданными данными.
-- `setImage(element: HTMLImageElement, src: string, alt?: string): void` — устанавливает изображение и альтернативный текст.
+Абстрактный базовый класс для всех компонентов интерфейса.
+- **Методы:**
+  - `render(data?: Partial<T>): HTMLElement` — отрисовывает компонент с переданными данными.
+  - `setImage(element: HTMLImageElement, src: string, alt?: string): void` — устанавливает изображение.
+  - `setText(element: HTMLElement | null, text: string): void` — устанавливает текстовое содержимое.
 
 #### `Card<T>`
 Абстрактный базовый класс для всех карточек товара. Наследуется от `Component`.
-- **Поля:** `categoryElement`, `titleElement`, `imageElement`, `priceElement`, `buttonElement` (опционально).
-- **Сеттеры:** `category`, `title`, `image`, `price` — заполняют соответствующие DOM-элементы.
+- **Поля:**
+  - `titleElement: HTMLElement` – элемент названия товара.
+  - `priceElement: HTMLElement` – элемент цены.
+- **Сеттеры:**
+  - `title(value: string): void`
+  - `price(value: number | null): void`
+
+#### `CardWithImage<T>`
+Промежуточный абстрактный класс для карточек с изображением и категорией. Наследуется от `Card`.
+- **Поля:**
+  - `categoryElement: HTMLElement` – элемент категории.
+  - `imageElement: HTMLImageElement` – элемент изображения.
+- **Сеттеры:**
+  - `category(value: string): void`
+  - `image(value: string): void`
 
 #### `Form<T>`
 Абстрактный базовый класс для форм оформления заказа. Наследуется от `Component`.
-- **Поля:** `submitButton`, `errorElement`.
-- **Методы:** `onInputChange(field, value)` — генерирует событие изменения поля.
-- **Сеттеры:** `valid`, `errors` — управляют активностью кнопки и отображением ошибок.
+- **Поля:**
+  - `submitButton: HTMLButtonElement` – кнопка отправки.
+  - `errorElement: HTMLElement` – элемент для отображения ошибок.
+- **Сеттеры:**
+  - `valid(value: boolean): void` – управляет активностью кнопки.
+  - `errors(value: string): void` – отображает ошибки.
 
 ### Компоненты представления
 
 #### `CardCatalog`
-Карточка товара в каталоге. Наследуется от `Card<IProduct>`.
-- При клике генерирует событие `product:select`.
+Карточка товара в каталоге. Наследуется от `CardWithImage<IProduct>`.
+- **Конструктор:** `constructor(container: HTMLElement, onClick: (event: MouseEvent) => void)`
+- При клике вызывает переданный колбэк `onClick`.
 
 #### `CardPreview`
-Карточка товара в модальном окне с подробной информацией. Наследуется от `Card<IProduct>`.
-- **Дополнительные поля:** `descriptionElement`, `buttonElement` (обязательное).
-- **Сеттеры:** `description`, `inBasket`, `price` (переопределён для текста «Недоступно»).
-- Генерирует события `product:add` или `product:remove`.
+Карточка товара в модальном окне с подробной информацией. Наследуется от `CardWithImage<IProduct>`.
+- **Поля:**
+  - `descriptionElement: HTMLElement` – элемент описания.
+  - `buttonElement: HTMLButtonElement` – кнопка действия.
+- **Сеттеры:**
+  - `description(value: string): void`
+  - `inBasket(value: boolean): void` – меняет текст кнопки.
+  - `price(value: number | null): void` – переопределён для текста «Недоступно».
+- При клике на кнопку генерирует событие `preview:action`.
 
 #### `CardBasket`
 Карточка товара в корзине. Наследуется от `Card<IProduct>`.
-- **Дополнительные поля:** `indexElement`, `deleteButton`.
-- **Сеттер:** `index` — порядковый номер.
-- При клике на кнопку удаления генерирует событие `product:remove`.
+- **Поля:**
+  - `indexElement: HTMLElement` – элемент порядкового номера.
+  - `deleteButton: HTMLButtonElement` – кнопка удаления.
+- **Сеттеры:**
+  - `index(value: number): void`
+- **Конструктор:** `constructor(container: HTMLElement, onDelete: () => void)`
+- При клике на кнопку удаления вызывает колбэк `onDelete`.
 
 #### `Modal`
 Управляет модальным окном. Наследуется от `Component<{ content: HTMLElement }>`.
-- **Методы:** `open()`, `close()`.
-- **Геттер:** `activeContent` — текущее содержимое окна.
+- **Поля:**
+  - `closeButton: HTMLButtonElement`
+  - `contentContainer: HTMLElement`
+- **Методы:**
+  - `open(): void`
+  - `close(): void`
+- **Сеттеры:**
+  - `content(value: HTMLElement): void`
 - Закрывается по клику на крестик или вне окна.
 - Генерирует события `modal:open` и `modal:close`.
 
 #### `BasketView`
-Отображение корзины. Наследуется от `Component<{ items: IProduct[]; total: number }>`.
-- **Поля:** `listElement`, `totalElement`, `buttonElement`.
-- **Сеттеры:** `items` (отрисовывает список через фабрику), `total`.
+Отображение корзины. Наследуется от `Component<{ items: HTMLElement[]; total: number }>`.
+- **Поля:**
+  - `listElement: HTMLElement`
+  - `totalElement: HTMLElement`
+  - `buttonElement: HTMLButtonElement`
+- **Сеттеры:**
+  - `items(value: HTMLElement[]): void` – заменяет содержимое списка.
+  - `total(value: number): void`
 - При клике на кнопку «Оформить» генерирует событие `order:start`.
 
 #### `OrderForm`
 Форма первого шага оформления (способ оплаты, адрес). Наследуется от `Form<IBuyer>`.
-- **Поля:** `paymentButtons`.
-- **Сеттеры:** `payment`, `address`.
-- Управляет активным состоянием кнопок оплаты.
+- **Поля:**
+  - `paymentButtons: NodeListOf<HTMLButtonElement>`
+- **Сеттеры:**
+  - `payment(value: string): void`
+  - `address(value: string): void`
+- При клике на кнопку оплаты генерирует событие `form:change`.
 
 #### `ContactsForm`
 Форма второго шага оформления (email, телефон). Наследуется от `Form<IBuyer>`.
-- **Сеттеры:** `email`, `phone`.
+- **Сеттеры:**
+  - `email(value: string): void`
+  - `phone(value: string): void`
 
 #### `SuccessView`
 Окно успешного оформления заказа. Наследуется от `Component<{ total: number }>`.
-- **Сеттер:** `total` — отображает списанную сумму.
+- **Поля:**
+  - `descriptionElement: HTMLElement`
+  - `closeButton: HTMLButtonElement`
+- **Сеттеры:**
+  - `total(value: number): void` – отображает списанную сумму.
 - При клике на кнопку закрытия генерирует событие `success:close`.
+
+#### `GalleryView`
+Представление галереи товаров. Наследуется от `Component<{ items: IProduct[] }>`.
+- **Конструктор:** `constructor(container: HTMLElement, events: IEvents, template: HTMLTemplateElement)`
+- **Сеттеры:**
+  - `items(value: IProduct[]): void` – отрисовывает карточки каталога.
+
+#### `HeaderBasketView`
+Представление кнопки корзины в хедере. Наследуется от `Component<{ count: number }>`.
+- **Поля:**
+  - `counterElement: HTMLElement`
+- **Сеттеры:**
+  - `count(value: number): void` – обновляет счётчик.
+- При клике генерирует событие `basket:open`.
 
 ## События приложения
 
-| Событие               | Источник          | Данные                        | Обработчик (Presenter)                       |
-|-----------------------|-------------------|-------------------------------|----------------------------------------------|
-| `catalog:changed`     | ProductsModel     | `{ items: IProduct[] }`       | Отрисовка каталога                           |
-| `product:selected`    | ProductsModel     | `IProduct`                    | Открытие модального окна с превью            |
-| `product:select`      | CardCatalog       | `IProduct`                    | Вызов `setSelectedItem`                      |
-| `product:add`         | CardPreview       | `IProduct`                    | Добавление товара в корзину                  |
-| `product:remove`      | CardPreview, CardBasket | `IProduct`              | Удаление товара из корзины                   |
-| `basket:changed`      | BasketModel       | `{ items: IProduct[] }`       | Обновление счётчика, перерисовка корзины     |
-| `order:start`         | BasketView        | нет                           | Открытие формы первого шага                  |
-| `form:change`         | OrderForm, ContactsForm | `{ field, value, formId }` | Обновление BuyerModel, валидация             |
-| `order:submit`        | OrderForm         | нет                           | Переход ко второму шагу оформления           |
-| `contacts:submit`     | ContactsForm      | нет                           | Отправка заказа на сервер                    |
-| `success:close`       | SuccessView       | нет                           | Закрытие модального окна                     |
-| `modal:open`/`modal:close` | Modal        | нет                           | Управление состоянием модального окна        |
-| `buyer:changed`       | BuyerModel        | `IBuyer`                      | Синхронизация данных покупателя              |
+| Событие               | Источник                    | Данные                               | Обработчик (Presenter)                       |
+|-----------------------|-----------------------------|--------------------------------------|----------------------------------------------|
+| `catalog:changed`     | `ProductsModel`             | `{ items: IProduct[] }`              | Отрисовка галереи                            |
+| `product:selected`    | `ProductsModel`             | `IProduct`                           | Открытие модального окна с превью            |
+| `product:select`      | `CardCatalog` (колбэк)      | `IProduct`                           | Вызов `setSelectedItem`                      |
+| `preview:action`      | `CardPreview`               | нет                                  | Добавление/удаление товара из корзины        |
+| `basket:changed`      | `BasketModel`               | `{ items: IProduct[] }`              | Обновление счётчика, корзины и галереи       |
+| `basket:open`         | `HeaderBasketView`          | нет                                  | Открытие модального окна с корзиной          |
+| `order:start`         | `BasketView`                | нет                                  | Открытие формы первого шага                  |
+| `form:change`         | `OrderForm`, `ContactsForm` | `{ field, value, formId }`           | Обновление `BuyerModel`                      |
+| `buyer:changed`       | `BuyerModel`                | `IBuyer`                             | Валидация и обновление форм                  |
+| `order:submit`        | `OrderForm`                 | нет                                  | Переход ко второму шагу оформления           |
+| `contacts:submit`     | `ContactsForm`              | нет                                  | Отправка заказа на сервер                    |
+| `success:close`       | `SuccessView`               | нет                                  | Закрытие модального окна                     |
+| `modal:open`          | `Modal`                     | нет                                  | Управление состоянием модального окна        |
+| `modal:close`         | `Modal`                     | нет                                  | Управление состоянием модального окна        |
 
 ## Презентер
 
@@ -253,3 +360,4 @@ Presenter - презентер содержит основную логику п
 - Управление корзиной (добавление, удаление, перерисовка).
 - Пошаговое оформление заказа с валидацией полей.
 - Отправка заказа на сервер и отображение результата.
+- Обновление всех представлений только в ответ на события изменения моделей.
