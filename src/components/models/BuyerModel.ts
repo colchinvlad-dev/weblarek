@@ -43,24 +43,12 @@ export class BuyerModel {
         this.events.emit('buyer:changed', this.getData());
     }
 
-    // Валидация только для первого шага (payment, address)
-    validateOrder(): BuyerErrors {
+    validate(): BuyerErrors {
         const errors: BuyerErrors = {};
         if (!this._payment) errors.payment = 'Не выбран способ оплаты';
-        if (!this._address.trim()) errors.address = 'Укажите адрес доставки';
-        return errors;
-    }
-
-    // Валидация только для второго шага (email, phone)
-    validateContacts(): BuyerErrors {
-        const errors: BuyerErrors = {};
         if (!this._email.trim()) errors.email = 'Укажите email';
         if (!this._phone.trim()) errors.phone = 'Укажите телефон';
+        if (!this._address.trim()) errors.address = 'Укажите адрес доставки';
         return errors;
-    }
-
-    // Общая валидация (если понадобится)
-    validate(): BuyerErrors {
-        return { ...this.validateOrder(), ...this.validateContacts() };
     }
 }
