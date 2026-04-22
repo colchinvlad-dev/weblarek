@@ -1,28 +1,23 @@
-import { Card } from './Card';
+import { CardWithImage } from './CardWithImage';
 import { IProduct } from '../../types';
 import { IEvents } from '../base/Events';
-import { ensureElement } from '../../utils/utils';
 
-export class CardPreview extends Card<IProduct> {
+export class CardPreview extends CardWithImage<IProduct> {
     protected descriptionElement: HTMLElement;
     protected buttonElement: HTMLButtonElement;
-    protected data?: IProduct;
 
     constructor(container: HTMLElement, protected events: IEvents) {
         super(container);
-        this.descriptionElement = ensureElement<HTMLElement>('.card__text', container);
-        this.buttonElement = ensureElement<HTMLButtonElement>('.card__button', container);
+        this.descriptionElement = container.querySelector<HTMLElement>('.card__text')!;
+        this.buttonElement = container.querySelector<HTMLButtonElement>('.card__button')!;
 
         this.buttonElement.addEventListener('click', () => {
-            if (this.data) {
-                const isInBasket = this.buttonElement.textContent === 'Удалить из корзины';
-                this.events.emit(isInBasket ? 'product:remove' : 'product:add', this.data);
-            }
+            this.events.emit('preview:action');
         });
     }
 
     set description(value: string) {
-        this.setText(this.descriptionElement, value);
+        this.descriptionElement.textContent = value;
     }
 
     set inBasket(value: boolean) {
@@ -34,13 +29,19 @@ export class CardPreview extends Card<IProduct> {
         if (value === null) {
             this.buttonElement.textContent = 'Недоступно';
             this.buttonElement.disabled = true;
+        } else {
+            // Сбрасываем disabled, если цена есть
+            this.buttonElement.disabled = false;
         }
     }
 
-    render(data: IProduct & { inBasket: boolean }): HTMLElement {
-        this.data = data;
-        super.render(data);
-        this.inBasket = data.inBasket;
+    render(data?: IProduct & { inBasket: boolean }): HTMLElement {
+        if (data) {
+            super.render(data);
+            this.description = data.description;
+            this.inBasket = data.inBasket;
+            // Цена устанавливается через super.render, но переопределённый сеттер уже сработал
+        }
         return this.container;
     }
 }

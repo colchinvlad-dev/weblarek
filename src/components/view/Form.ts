@@ -13,9 +13,11 @@ export abstract class Form<T> extends Component<T> {
 
         this.container.addEventListener('input', (e: Event) => {
             const target = e.target as HTMLInputElement;
-            const field = target.name as keyof T;
-            const value = target.value;
-            this.onInputChange(field, value);
+            this.events.emit('form:change', {
+                field: target.name,
+                value: target.value,
+                formId: this.container.id
+            });
         });
 
         this.container.addEventListener('submit', (e: Event) => {
@@ -24,19 +26,18 @@ export abstract class Form<T> extends Component<T> {
         });
     }
 
-    protected onInputChange(field: keyof T, value: string) {
-        this.events.emit('form:change', { field, value, formId: this.container.id });
-    }
-
     set valid(value: boolean) {
         this.submitButton.disabled = !value;
     }
 
     set errors(value: string) {
-        this.setText(this.errorElement, value);
+        this.errorElement.textContent = value;
     }
 
-    protected setText(el: HTMLElement | null, text: string) {
-        if (el) el.textContent = text;
+    render(data?: Partial<T>): HTMLElement {
+        if (data) {
+            super.render(data);
+        }
+        return this.container;
     }
 }

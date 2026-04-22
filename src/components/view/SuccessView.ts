@@ -1,4 +1,3 @@
-// src/components/view/SuccessView.ts
 import { Component } from '../base/Component';
 import { IEvents } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
@@ -18,10 +17,13 @@ export class SuccessView extends Component<{ total: number }> {
     }
 
     set total(value: number) {
-        this.setText(this.descriptionElement, `Списано ${value} синапсов`);
+        this.descriptionElement.textContent = `Списано ${value} синапсов`;
     }
 
-    protected setText(el: HTMLElement | null, text: string) {
-        if (el) el.textContent = text;
+    render(data?: { total: number }): HTMLElement {
+        if (data) {
+            this.total = data.total;
+        }
+        return this.container;
     }
 }

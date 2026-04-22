@@ -1,11 +1,9 @@
-import { Card } from './Card';
+import { CardWithImage } from './CardWithImage';
 import { IProduct } from '../../types';
 
-export class CardCatalog extends Card<IProduct> {
-    constructor(container: HTMLElement, onClick?: (event: MouseEvent) => void) {
+export class CardCatalog extends CardWithImage<IProduct> {
+    constructor(container: HTMLElement, onClick: (event: MouseEvent) => void) {
         super(container);
-        if (onClick) {
-            this.container.addEventListener('click', onClick);
-        }
+        this.container.addEventListener('click', onClick);
     }
 }

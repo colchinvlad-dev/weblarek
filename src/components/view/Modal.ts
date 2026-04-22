@@ -20,10 +20,6 @@ export class Modal extends Component<{ content: HTMLElement }> {
         this.contentContainer.replaceChildren(value);
     }
 
-    get activeContent(): HTMLElement | null {
-        return this.contentContainer.firstElementChild as HTMLElement | null;
-    }
-
     open() {
         this.container.classList.add('modal_active');
         this.events.emit('modal:open');

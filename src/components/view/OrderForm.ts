@@ -15,7 +15,11 @@ export class OrderForm extends Form<IBuyer> {
                 const payment = btn.name as 'card' | 'cash';
                 this.paymentButtons.forEach(b => b.classList.remove('button_alt-active'));
                 btn.classList.add('button_alt-active');
-                this.onInputChange('payment', payment);
+                this.events.emit('form:change', {
+                    field: 'payment',
+                    value: payment,
+                    formId: this.container.id
+                });
             });
         });
     }
@@ -31,10 +35,12 @@ export class OrderForm extends Form<IBuyer> {
         input.value = value;
     }
 
-    render(data: Partial<IBuyer> & { valid: boolean; errors: string }): HTMLElement {
-        super.render(data);
-        this.payment = data.payment || '';
-        this.address = data.address || '';
+    render(data?: Partial<IBuyer> & { valid: boolean; errors: string }): HTMLElement {
+        if (data) {
+            super.render(data);
+            this.payment = data.payment || '';
+            this.address = data.address || '';
+        }
         return this.container;
     }
 }

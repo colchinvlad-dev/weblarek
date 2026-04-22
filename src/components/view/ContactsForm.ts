@@ -17,10 +17,12 @@ export class ContactsForm extends Form<IBuyer> {
         if (input) input.value = value;
     }
 
-    render(data: Partial<IBuyer> & { valid: boolean; errors: string }): HTMLElement {
-        super.render(data);
-        this.email = data.email || '';
-        this.phone = data.phone || '';
+    render(data?: Partial<IBuyer> & { valid: boolean; errors: string }): HTMLElement {
+        if (data) {
+            super.render(data);
+            this.email = data.email || '';
+            this.phone = data.phone || '';
+        }
         return this.container;
     }
 }
